@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 from persistence import Download, Partition, Transfer
 from runtimes import pubsub, webapi
+from scheduling import schedule
 
 
 @pubsub.expose
@@ -17,7 +18,7 @@ async def download(payload):
         certificate=credentials['certificate'],
         parallelism=options['parallelism'],
         target_directory=target['directory'],
-        target_host=target['host'],
+        target_hostname=target['hostname'],
         target_password=credentials['password'],
         target_username=credentials['username'],
     )
@@ -33,6 +34,9 @@ async def download(payload):
                 filename=filename, 
                 partition=partition,
             )
+
+    # Schedule the download.
+    await schedule(download)
 
     # The identifier can be used to manage the download.
     output = { 

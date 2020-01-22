@@ -15,7 +15,7 @@ class Download(Model):
     parallelism = Integer()
     status = String(max_length=100, default='created')
     target_directory = String(max_length=100)
-    target_host = String(max_length=100)
+    target_hostname = String(max_length=100)
     target_password = String(max_length=100)
     target_username = String(max_length=100)
 
@@ -64,8 +64,8 @@ class Job(Model):
 
     # Fields
     download = ForeignKey(Download)
-    status = String(max_length=100)
-    xenon_id = String(max_length=100)
+    status = String(max_length=100, default='created')
+    xenon_id = String(max_length=100, allow_null=True)
 
     # Timestamps
     created = DateTime(default=datetime.now)
