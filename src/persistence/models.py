@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from orm import DateTime, ForeignKey, Integer, Model, String
 from persistence import database, metadata
 
@@ -9,10 +11,16 @@ class Download(Model):
     identifier = Integer(primary_key=True)
 
     # Fields
-    status = String(max_length=100)
+    certificate = String(max_length=None)
+    parallelism = Integer()
+    status = String(max_length=100, default='created')
+    target_directory = String(max_length=100)
+    target_host = String(max_length=100)
+    target_password = String(max_length=100)
+    target_username = String(max_length=100)
 
     # Timestamps
-    created = DateTime()
+    created = DateTime(default=datetime.now)
     started = DateTime(allow_null=True)
     stopped = DateTime(allow_null=True)
 
@@ -26,7 +34,7 @@ class Partition(Model):
 
     # Fields
     download = ForeignKey(Download)
-    status = String(max_length=100)
+    status = String(max_length=100, default='created')
 
     # Timestamps
     started = DateTime(allow_null=True)
@@ -60,7 +68,7 @@ class Job(Model):
     xenon_id = String(max_length=100)
 
     # Timestamps
-    created = DateTime()
+    created = DateTime(default=datetime.now)
     started = DateTime(allow_null=True)
     stopped = DateTime(allow_null=True)
 
