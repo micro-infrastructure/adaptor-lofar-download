@@ -34,7 +34,7 @@ def download(partition, callback_url, job, proxy_file, working_dir):
     identifier = partition['identifier']
     transfers = partition['transfers']
 
-    copyjob = create_copyjob(transfers)
+    copyjob = '\n'.join([path.join(f'{t} file:////local/', path.basename(t)) for t in transfers])
     random = str(uuid4().hex[0:4])
     copyjob_file = path.join(working_dir, f'copyjob_{random}')
 
