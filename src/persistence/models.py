@@ -83,7 +83,8 @@ class Attempt(Model):
     # Fields
     job = ForeignKey(Job)
     partition = ForeignKey(Partition)
+    status = String(max_length=100, default='started')
 
     # Timestamps
-    started = DateTime()
+    started = DateTime(default=datetime.now)
     stopped = DateTime(allow_null=True)
