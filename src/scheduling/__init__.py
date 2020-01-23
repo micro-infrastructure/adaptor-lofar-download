@@ -31,8 +31,9 @@ async def schedule(download):
     remotefs.write_to_file(proxy_path, proxy_lines)
 
     # Prepare arguments
+    callback_url = getenv('LOFARDOWNLOAD_SERVICE') + '/callback'
     arguments = await create_arguments(
-        getenv('LOFARDOWNLOAD_SERVICE'),
+        callback_url,
         download,
         job.identifier,
         str(proxy_path),
@@ -61,8 +62,6 @@ async def schedule(download):
 
 
 async def create_arguments(callback_url, download, identifier, proxy_file, parallelism):
-    callback_url = getenv('LOFAR_SERVICE')
-
     partitions = [{
         'identifier': p.identifier,
         'transfers': [

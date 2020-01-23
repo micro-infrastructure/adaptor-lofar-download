@@ -81,6 +81,6 @@ if __name__ == '__main__':
     callback(identifier, 'started', 'job')
 
     with Pool(processes=parallelism) as pool:
-        pool.map(download, partitions, callback)
+        pool.map(download, partitions)
 
     callback(identifier, 'stopped', 'job')
