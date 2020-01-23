@@ -11,6 +11,11 @@ PORT = getenv('PORT', default=8090)
 
 
 if __name__ == '__main__':
+    callback_url = getenv('LOFARDOWNLOAD_SERVICE')
+    if callback_url is None:
+        print('Please set the LOFARDOWNLOAD_SERVICE (external URL) environment variable.')
+        exit(1)
+
     pubsub.start(AMQP_ADDRESS)
     webapi.start(HOST, PORT)
 

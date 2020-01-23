@@ -39,7 +39,7 @@ async def download(payload):
     await schedule(download)
 
     # The identifier can be used to manage the download.
-    output = { 
+    output = {
         "identifier": download.identifier
     }
     return (output, HTTPStatus.ACCEPTED)
