@@ -50,7 +50,7 @@ class Transfer(Model):
 
     # Fields
     checksum = String(max_length=100, allow_null=True)
-    filename = String(max_length=100)
+    filename = String(max_length=None)
     partition = ForeignKey(Partition)
     size = Integer(allow_null=True)
 

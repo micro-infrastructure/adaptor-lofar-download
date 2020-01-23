@@ -70,6 +70,7 @@ if __name__ == '__main__':
     callback_url = arguments['callback_url']
     partitions = arguments['partitions']
     identifier = arguments['identifier']
+    parallelism = arguments['parallelism']
     proxy_file = arguments['proxy_file']
 
     # Prepare callback and download functions

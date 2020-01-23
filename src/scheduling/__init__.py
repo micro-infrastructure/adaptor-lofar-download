@@ -13,6 +13,7 @@ IMAGE = 'docker://microinfrastructure/adaptor-lofar-download-hpc'
 
 async def schedule(download):
     hostname = download.target_hostname
+    parallelism = download.parallelism
     password = download.target_password
     username = download.target_username
     
@@ -34,7 +35,8 @@ async def schedule(download):
         getenv('LOFARDOWNLOAD_SERVICE'),
         download,
         job.identifier,
-        str(proxy_path)
+        str(proxy_path),
+        parallelism
     )
 
     # Write bootstrap script to remote filesystem
@@ -58,7 +60,7 @@ async def schedule(download):
     remotefs.delete(script_path)
 
 
-async def create_arguments(callback_url, download, identifier, proxy_file):
+async def create_arguments(callback_url, download, identifier, proxy_file, parallelism):
     callback_url = getenv('LOFAR_SERVICE')
 
     partitions = [{
@@ -70,6 +72,7 @@ async def create_arguments(callback_url, download, identifier, proxy_file):
 
     return b64encode(dumps({
         'callback_url': callback_url,
+        'parallelism': parallelism,
         'partitions': partitions,
         'identifier': identifier,
         'proxy_file': proxy_file
