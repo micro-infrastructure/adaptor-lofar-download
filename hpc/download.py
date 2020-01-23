@@ -28,40 +28,40 @@ def prepare_callback(url, job):
     return callback
 
 
-def prepare_download(callback, proxy_file, working_dir):
-    def download(partition):
-        identifier = partition['identifier']
-        transfers = partition['transfers']
+def download(partition, callback_url, job, proxy_file, working_dir):
+    callback = prepare_callback(callback_url, job)
 
-        copyjob = create_copyjob(transfers)
-        random = str(uuid4().hex[0:4])
-        copyjob_file = path.join(working_dir, f'copyjob_{random}')
+    identifier = partition['identifier']
+    transfers = partition['transfers']
 
-        # Write copyjob to file
-        with open(copyjob_file, 'w') as f:
-            f.write(copyjob)
+    copyjob = create_copyjob(transfers)
+    random = str(uuid4().hex[0:4])
+    copyjob_file = path.join(working_dir, f'copyjob_{random}')
 
-        command = [
-            'srmcp',
-            '-debug',
-            '-use_urlcopy_script=true',
-            '-urlcopy=/var/local/lta-url-copy.sh',
-            '-server_mode=passive',
-            f'-x509_user_proxy={proxy_file}',
-            f'-copyjobfile={copyjob_file}'
-        ]
+    # Write copyjob to file
+    with open(copyjob_file, 'w') as f:
+        f.write(copyjob)
 
-        try:
-            callback(identifier, 'started', 'partition')
-            run(command, stdout=PIPE, check=True)
-            callback(identifier, 'complete', 'partition')
-        except:
-            callback(identifier, 'failed', 'partition')
+    command = [
+        'srmcp',
+        '-debug',
+        '-use_urlcopy_script=true',
+        '-urlcopy=/var/local/lta-url-copy.sh',
+        '-server_mode=passive',
+        f'-x509_user_proxy={proxy_file}',
+        f'-copyjobfile={copyjob_file}'
+    ]
 
-        # Cleanup
-        remove(copyjob_file)
+    try:
+        callback(identifier, 'started', 'partition')
+        run(command, stdout=PIPE, check=True)
+        callback(identifier, 'complete', 'partition')
+    except:
+        callback(identifier, 'failed', 'partition')
 
-    return download
+    # Cleanup
+    remove(copyjob_file)
+
 
 if __name__ == '__main__':
     arguments = loads(b64decode(argv[1]).decode('UTF-8'))
@@ -75,12 +75,19 @@ if __name__ == '__main__':
 
     # Prepare callback and download functions
     callback = prepare_callback(callback_url, identifier)
-    download = prepare_download(callback, proxy_file, working_dir)
 
     # Start downloading
     callback(identifier, 'started', 'job')
 
+    partitions_with_arguments = [[
+        partition,
+        callback_url,
+        identifier,
+        proxy_file,
+        working_dir
+    ] for partition in partitions]
+
     with Pool(processes=parallelism) as pool:
-        pool.map(download, partitions)
+        pool.starmap(download, partitions_with_arguments)
 
     callback(identifier, 'stopped', 'job')
