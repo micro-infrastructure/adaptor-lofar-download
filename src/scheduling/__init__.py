@@ -12,6 +12,7 @@ IMAGE = 'docker://microinfrastructure/adaptor-lofar-download-hpc'
 
 
 async def schedule(download):
+    directory = download.target_directory
     hostname = download.target_hostname
     parallelism = download.parallelism
     password = download.target_password
@@ -41,7 +42,7 @@ async def schedule(download):
     )
 
     # Write bootstrap script to remote filesystem
-    script = f'singularity run {IMAGE} {arguments}'
+    script = f'singularity run -B {directory}:/local {IMAGE} {arguments}'
     script_path = create_unique_path('bootstrap.sh')
     script_lines = [l.encode('UTF-8') for l in script.splitlines(keepends=True)]
 

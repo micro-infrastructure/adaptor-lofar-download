@@ -10,7 +10,7 @@ from scheduling import schedule
 @webapi.expose
 async def callback(payload):
     identifier, job, status, subject = unpack_command(payload)
-    job = await Job.objects.get(identifier=job)
+    job = await Job.objects.filter(identifier=job).get()
 
     if subject == 'job':
         if status == 'started':
@@ -20,12 +20,19 @@ async def callback(payload):
             await job.update(status=status, stopped=datetime.now())
 
     if subject == 'partition':
-        partition = await Partition.get(identifier=identifier)
+        partition = await Partition.objects.filter(identifier=identifier).get()
 
         if status == 'started':
+            await (Attempt
+                .objects.filter(job=job, partition=partition)
+                .update(status='failed', stopped=datetime.now()))
+
             await Attempt.objects.create(job=job, partition=partition)
         else:
-            attempt = await Attempt.get(identifier=identifier)
+            attempt = await (Attempt.objects
+                .filter(job=job, partition=partition, status='started')
+                .get())
+
             await attempt.update(status=status, stopped=datetime.now())
 
     return (None, HTTPStatus.ACCEPTED)
