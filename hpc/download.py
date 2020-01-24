@@ -6,6 +6,7 @@ from os import path, remove, environ
 from subprocess import run, PIPE
 from sys import argv, exc_info
 from urllib.request import Request, urlopen
+from uuid import uuid4
 
 
 def prepare_callback(url, job):
