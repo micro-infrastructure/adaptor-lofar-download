@@ -42,7 +42,9 @@ async def schedule(download):
     )
 
     # Write bootstrap script to remote filesystem
-    script = f'singularity run -B {directory}:/local {IMAGE} {arguments}'
+    generate_bootstrap = get_bootstrap_generator(hostname)
+
+    script = generate_bootstrap(directory, IMAGE, arguments)
     script_path = create_unique_path('bootstrap.sh')
     script_lines = [l.encode('UTF-8') for l in script.splitlines(keepends=True)]
 
