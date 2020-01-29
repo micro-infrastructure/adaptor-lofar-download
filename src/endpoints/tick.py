@@ -50,6 +50,15 @@ async def review_downloads():
             await create_job(download)
 
 
+STOPPED_STATES = [
+    'CANCELLED', 
+    'FAILED', 
+    'NODE_FAIL', 
+    'OUT_OF_MEMORY', 
+    'PREEMPTED', 
+    'TIMEOUT'
+]
+
 async def update_jobs(download, scheduler):
     jobs = await Job.objects.filter(
         download=download, 
@@ -63,6 +72,6 @@ async def update_jobs(download, scheduler):
         state = get_xenon_state(job.xenon_id, scheduler).state
         await job.update(xenon_state=state, updated=datetime.now())
 
-        if state in ['CANCELLED', 'FAILED']:
+        if state in STOPPED_STATES:
             await job.update(status='stopped', stopped=datetime.now())
     
