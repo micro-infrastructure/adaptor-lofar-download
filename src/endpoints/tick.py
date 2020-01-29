@@ -72,6 +72,6 @@ async def update_jobs(download, scheduler):
         state = get_xenon_state(job.xenon_id, scheduler).state
         await job.update(xenon_state=state, updated=datetime.now())
 
-        if state in STOPPED_STATES:
+        if state in STOPPED_STATES or state.startswith('CANCELLED'):
             await job.update(status='stopped', stopped=datetime.now())
     
