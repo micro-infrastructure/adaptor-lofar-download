@@ -1,7 +1,7 @@
-from scheduling.bootstrap.cyf import get_cyf_bootstrap_script
-from scheduling.bootstrap.das5 import get_das5_bootstrap_script
-from scheduling.bootstrap.lisa import get_lisa_bootstrap_script
-from scheduling.bootstrap.lrz import get_lrz_bootstrap_script
+from .cyf import get_cyf_bootstrap_script
+from .das5 import get_das5_bootstrap_script
+from .lisa import get_lisa_bootstrap_script
+from .lrz import get_lrz_bootstrap_script
 
 __DAS5 = [
     'fs0.das5.cs.vu.nl',

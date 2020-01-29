@@ -1,6 +1,8 @@
 from persistence import Job, Partition, Transfer
 from runtimes import xenon
+from .boostrap import get_bootstrap_generator
 
+from operator import attrgetter
 from base64 import b64decode, b64encode
 from json import dumps
 from hashlib import md5
@@ -72,7 +74,13 @@ async def create_arguments(callback_url, download, identifier, proxy_file, paral
         'transfers': [
             t.filename for t in await Transfer.objects.filter(partition=p).all()
         ]
-    } for p in await Partition.objects.filter(download=download).all()]
+    } for p in sorted(await
+        (Partition
+            .objects
+            .filter(download=download, status__in=['created', 'started'])
+            .all()),
+        key=lambda partition: partition.status, reverse=True)
+    ]
 
     return b64encode(dumps({
         'callback_url': callback_url,

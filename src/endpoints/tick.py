@@ -2,7 +2,7 @@ from http import HTTPStatus
 from datetime import datetime
 
 from orm.exceptions import NoMatch
-from persistence import Download, Job
+from persistence import Download, Job, Partition
 from runtimes import pubsub, webapi
 from scheduling import create_credential, create_scheduler, get_xenon_state, create_job
 
@@ -21,6 +21,12 @@ async def review_downloads():
     downloads = await Download.objects.filter(status='started').all()
     
     for download in downloads:
+        # Perhaps is finished?
+        non_complete = await Partition.objects.filter(status__in=['created', 'started']).all()
+        if len(non_complete) == 0:
+            await download.update(status='complete', stopped=datetime.now())
+            continue
+        
         scheduler = create_scheduler(
             hostname=download.target_hostname,
             credential=create_credential(
@@ -31,8 +37,9 @@ async def review_downloads():
 
         print('Updating jobs...')
         await update_jobs(download, scheduler)
+        scheduler.close()
         
-        # Get active job
+        # Ensure there is an active job.
         try:
             await Job.objects.filter(
                 download=download,
@@ -53,9 +60,9 @@ async def update_jobs(download, scheduler):
         if job.xenon_id is None:
             continue
 
-        state = get_xenon_state(job.xenon_id, scheduler)
+        state = get_xenon_state(job.xenon_id, scheduler).state
         await job.update(xenon_state=state, updated=datetime.now())
 
-        if state in ['CANCELLED', 'COMPLETED', 'FAILED']:
+        if state in ['CANCELLED', 'FAILED']:
             await job.update(status='stopped', stopped=datetime.now())
     

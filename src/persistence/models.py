@@ -14,7 +14,7 @@ class Download(Model):
     certificate = String(max_length=None)
     name = String(max_length=100)
     parallelism = Integer()
-    status = String(max_length=100, default='started')              # started -> stopped
+    status = String(max_length=100, default='started')              # started -> complete
     target_directory = String(max_length=100)
     target_hostname = String(max_length=100)
     target_password = String(max_length=100)
@@ -35,7 +35,7 @@ class Partition(Model):
 
     # Fields
     download = ForeignKey(Download)
-    status = String(max_length=100, default='created')
+    status = String(max_length=100, default='created')              # created -> started -> complete
 
     # Timestamps
     started = DateTime(allow_null=True)

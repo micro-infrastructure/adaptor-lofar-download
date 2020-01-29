@@ -1,4 +1,4 @@
-def get_lisa_bootstrap_script(directory, image, arguments):
+def get_das5_bootstrap_script(directory, image, arguments):
     script = ''
 
     script += '#!/bin/bash' + '\n'
@@ -10,6 +10,8 @@ def get_lisa_bootstrap_script(directory, image, arguments):
 
     script += '\n'
 
-    script += f'singularity run -B {directory}:/local {IMAGE} {arguments}' + '\n'
+    script += f'singularity run -B {directory}:/local {image} {arguments}' + '\n'
 
     script += '\n'
+
+    return script
