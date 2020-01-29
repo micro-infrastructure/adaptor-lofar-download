@@ -23,7 +23,12 @@ class WebApi():
         
     def wrap(self, function):
         async def wrapper(request):
-            payload = await request.json()
+            body = await request.body()
+            if len(body) > 0:
+                payload = await request.json()
+            else:
+                payload = {}
+
             result, status = await function(payload)
 
             if result is not None:

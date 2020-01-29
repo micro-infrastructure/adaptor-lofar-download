@@ -2,13 +2,12 @@ from http import HTTPStatus
 
 from persistence import Download, Partition, Transfer
 from runtimes import pubsub, webapi
-from scheduling import schedule
 
 
 @pubsub.expose
 @webapi.expose
 async def download(payload):
-    files, target, credentials, options = unpack_command(payload)
+    name, files, target, credentials, options, webhook = unpack_command(payload)
 
     # Divide file transfers into partitions.
     partitions = partitionize(files, options['partitions'])
@@ -16,11 +15,13 @@ async def download(payload):
     # Persist parameters.
     download = await Download.objects.create(
         certificate=credentials['certificate'],
+        name=name,
         parallelism=options['parallelism'],
-        target_directory=target['directory'],
-        target_hostname=target['hostname'],
+        target_directory=target['path'],
+        target_hostname=target['host'],
         target_password=credentials['password'],
         target_username=credentials['username'],
+        webhook_url=webhook.get('url', None)
     )
 
     # Persist partitions.
@@ -35,25 +36,25 @@ async def download(payload):
                 partition=partition,
             )
 
-    # Schedule the download.
-    await schedule(download)
-
     # The identifier can be used to manage the download.
     output = {
         "identifier": download.identifier
     }
+
     return (output, HTTPStatus.ACCEPTED)
 
 
 def unpack_command(payload):
+    name = payload['id']
     command = payload['cmd']
 
-    files = command['files']
-    target = command['target']
+    files = command['src']['paths']
+    target = command['dest']
     credentials = command['credentials']
-    options = command['options']
+    options = command.get('options', {})
+    webhook = command.get('webhook', {})
 
-    return (files, target, credentials, options)
+    return (name, files, target, credentials, options, webhook)
 
 
 def partitionize(items, n):

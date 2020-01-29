@@ -11,9 +11,14 @@ from time import localtime
 IMAGE = 'docker://microinfrastructure/adaptor-lofar-download-hpc'
 
 
-async def schedule(download):
+def get_xenon_state(xenon_id, scheduler):
+    return scheduler.get_job_status(xenon.Job(xenon_id))
+
+
+async def create_job(download):
     directory = download.target_directory
     hostname = download.target_hostname
+    name = download.name
     parallelism = download.parallelism
     password = download.target_password
     username = download.target_username
@@ -53,15 +58,12 @@ async def schedule(download):
     # Submit bootstrap script as job.
     job_description = xenon.JobDescription(
         executable='/bin/bash',
-        arguments=[script_path]
+        arguments=[str(script_path)]
     )
 
     scheduler = create_scheduler(hostname, credential)
     xenon_job = scheduler.submit_batch_job(job_description)
     await job.update(xenon_id=xenon_job.id)
-
-    # Cleanup
-    remotefs.delete(script_path)
 
 
 async def create_arguments(callback_url, download, identifier, proxy_file, parallelism):
@@ -97,7 +99,7 @@ def create_credential(username, password):
 def create_scheduler(hostname, credential):
     return xenon.Scheduler.create(
         adaptor='slurm',
-        location=f'ssh://{hostname}',
+        location=f'ssh://{hostname}:22',
         password_credential=credential,
         properties={
             'xenon.adaptors.schedulers.ssh.strictHostKeyChecking': 'false'
@@ -108,7 +110,7 @@ def create_scheduler(hostname, credential):
 def create_remotefs(hostname, credential):
     return xenon.FileSystem.create(
         'sftp',         
-        location=hostname,
+        location=f'{hostname}:22',
         password_credential=credential,
         properties={
             'xenon.adaptors.filesystems.sftp.strictHostKeyChecking': 'false'

@@ -3,7 +3,6 @@ from datetime import datetime
 
 from persistence import Attempt, Job, Partition
 from runtimes import pubsub, webapi
-from scheduling import schedule
 
 
 @pubsub.expose
