@@ -8,7 +8,7 @@ class Ticker():
 
     def start(self, interval, host, port):
         self.__scheduler.add_job(Ticker.tick, 'interval', args=(host, port), minutes=int(interval))
-        self.__scheduler.start(paused=True)
+        self.__scheduler.start()
 
     @staticmethod
     def tick(host, port):
