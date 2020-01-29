@@ -26,4 +26,4 @@ ADD src/ src/
 
 EXPOSE 8090
 
-ENTRYPOINT [ "python", "src/__main__.py" ]
+ENTRYPOINT [ "python3", "src/__main__.py" ]
