@@ -16,6 +16,8 @@ spec:
         - name: lofar-download
           image: microinfrastructure/adaptor-lofar-download
           env:
+            - name: "DEBUG"
+              value: "true"
             - name: "LOFARDOWNLOAD_SERVICE"
               value: "http://lobcder.process-project.eu:31888"
 ---
