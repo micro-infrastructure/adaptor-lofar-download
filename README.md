@@ -57,6 +57,7 @@ Use the following request payload:
 }
 ```
 
+## AMQP
 In case of AMQP, wrap the payload in the following JSON:
 
 ```json
