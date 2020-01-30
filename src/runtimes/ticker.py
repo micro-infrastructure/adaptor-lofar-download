@@ -1,5 +1,7 @@
 from apscheduler.schedulers.background import BackgroundScheduler
+from loguru import logger
 from requests import post
+
 
 class Ticker():
 
@@ -12,7 +14,10 @@ class Ticker():
 
     @staticmethod
     def tick(host, port):
-        post(f'http://{host}:{port}/tick')
+        try:
+            post(f'http://{host}:{port}/tick')
+        except Exception:
+            logger.exception("Tick request failed...")
     
 
 ticker = Ticker()

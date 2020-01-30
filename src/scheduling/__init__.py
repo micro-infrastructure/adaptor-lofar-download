@@ -60,7 +60,10 @@ async def create_job(download):
     # Submit bootstrap script as job.
     job_description = xenon.JobDescription(
         executable='/bin/bash',
-        arguments=[str(script_path)]
+        arguments=[str(script_path)],
+        name=name,
+        max_memory=8192,
+        cores_per_task=8,
     )
 
     scheduler = create_scheduler(hostname, credential)

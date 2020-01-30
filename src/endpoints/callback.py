@@ -15,6 +15,11 @@ async def callback(payload):
         if status == 'started':
             await job.update(status=status, started=datetime.now())
 
+            # Update attempts from previous jobs, if exists.
+            existing_attempts = await Attempt.objects.filter(job__download=job.download).all()
+            for attempt in existing_attemps:
+                await attempt.update(status='failed', stopped=datetime.now())
+
         if status == 'stopped':
             await job.update(status=status, xenon_state='COMPLETED', stopped=datetime.now())
 
@@ -24,11 +29,6 @@ async def callback(payload):
         if status == 'started':
             if partition.status == 'created':
                 await partition.update(status='started', started=datetime.now())
-
-            # Update previous attempts to failed, if exists
-            existing_attemps = await Attempt.objects.filter(job=job, partition=partition).all()
-            for attempt in existing_attemps:
-                await attempt.update(status='failed', stopped=datetime.now())
 
             # Create new attempt
             await Attempt.objects.create(job=job, partition=partition)

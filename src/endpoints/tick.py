@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from datetime import datetime
-
+from loguru import logger
 from orm.exceptions import NoMatch
 from persistence import Download, Job, Partition
 from runtimes import pubsub, webapi
@@ -19,12 +19,16 @@ async def tick(payload):
 
 async def review_downloads():
     downloads = await Download.objects.filter(status='started').all()
+    downloads_n = len(downloads)
+
+    logger.debug(f'Reviewing {downloads_n} downloads...')
     
     for download in downloads:
         # Perhaps is finished?
         non_complete = await Partition.objects.filter(status__in=['created', 'started']).all()
         if len(non_complete) == 0:
             await download.update(status='complete', stopped=datetime.now())
+            logger.info(f'Download {download.identifier} is complete!')
             continue
         
         scheduler = create_scheduler(
@@ -35,7 +39,7 @@ async def review_downloads():
             )
         )
 
-        print('Updating jobs...')
+        logger.debug(f'Updating job(s) of download {download.identifier}...')
         await update_jobs(download, scheduler)
         scheduler.close()
         
@@ -46,7 +50,7 @@ async def review_downloads():
                 status__in=['created', 'started']
             ).get()
         except NoMatch:
-            print('No active jobs!')
+            logger.info(f'No active job for download {download.identifier}, creating one...')
             await create_job(download)
 
 
@@ -73,5 +77,6 @@ async def update_jobs(download, scheduler):
         await job.update(xenon_state=state, updated=datetime.now())
 
         if state in STOPPED_STATES or state.startswith('CANCELLED'):
+            logger.info(f'Job {job.identifier} has stopped with state: {state}')
             await job.update(status='stopped', stopped=datetime.now())
     
