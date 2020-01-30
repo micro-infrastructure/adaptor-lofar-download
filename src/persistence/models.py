@@ -14,7 +14,7 @@ class Download(Model):
     certificate = String(max_length=None)
     name = String(max_length=100)
     parallelism = Integer()
-    status = String(max_length=100, default='started')              # started -> complete
+    status = String(max_length=100, default='started')              # started -> complete | canceled
     target_directory = String(max_length=100)
     target_hostname = String(max_length=100)
     target_password = String(max_length=100)

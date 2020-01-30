@@ -80,3 +80,6 @@ async def update_jobs(download, scheduler):
             logger.info(f'Job {job.identifier} has stopped with state: {state}')
             await job.update(status='stopped', stopped=datetime.now())
     
+
+def cancel_job(xenon_id, scheduler):
+    pass

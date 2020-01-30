@@ -17,6 +17,10 @@ def get_xenon_state(xenon_id, scheduler):
     return scheduler.get_job_status(xenon.Job(xenon_id))
 
 
+def cancel_job(xenon_id, scheduler):
+    return scheduler.cancel_job(xenon.Job(xenon_id))
+
+
 async def create_job(download):
     directory = download.target_directory
     hostname = download.target_hostname
