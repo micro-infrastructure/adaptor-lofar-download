@@ -14,12 +14,19 @@ from starlette.background import BackgroundTask
 async def cancel(payload):
     identifier = payload['identifier']
 
-    download = await Download.objects.filter(identifier=identifier).get()
-    await download.update(status='canceled', stopped=datetime.now())
+    try:
+        download = await Download.objects.filter(identifier=identifier).get()
+        await download.update(status='canceled', stopped=datetime.now())
+    except:
+        return (None, HTTPStatus.BAD_REQUEST)
 
-    jobs = Job.objects.filter(download=download).all()
+    logger.info(f'Canceled download: {identifier}')
+
+    jobs = await Job.objects.filter(download=download).all()
     for job in jobs:
         if job.status != 'stopped':
+            logger.info(f'Cancelling job {job.identifier}...')
+
             scheduler = create_scheduler(
                 hostname=download.target_hostname,
                 credential=create_credential(
