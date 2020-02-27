@@ -23,57 +23,63 @@ async def review_downloads():
     downloads_n = len(downloads)
 
     logger.debug(f'Reviewing {downloads_n} downloads...')
-    
+
     for download in downloads:
-        # Perhaps is finished?
-        non_complete = await Partition.objects.filter(status__in=['created', 'started']).all()
-        if len(non_complete) == 0:
-            await download.update(status='complete', stopped=datetime.now())
-            logger.info(f'Download {download.identifier} is complete!')
-
-            logger.info(f'Performing webhook for download {download.identifier}')
-            try:
-                post(download.webhook_url, json={'identifier': download.identifier})
-            except Exception:
-                logger.exception(f'Failed to perform webhook for {download.identifier}')
-
-            continue
-        
-        scheduler = create_scheduler(
-            hostname=download.target_hostname,
-            credential=create_credential(
-                username=download.target_username, 
-                password=download.target_password
-            )
-        )
-
-        logger.debug(f'Updating job(s) of download {download.identifier}...')
-        await update_jobs(download, scheduler)
-        scheduler.close()
-        
-        # Ensure there is an active job.
         try:
-            await Job.objects.filter(
+            # Perhaps download is finished?
+            non_complete = await Partition.objects.filter(
                 download=download,
                 status__in=['created', 'started']
-            ).get()
-        except NoMatch:
-            logger.info(f'No active job for download {download.identifier}, creating one...')
-            await create_job(download)
+            ).all()
 
+            if len(non_complete) == 0:
+                await download.update(status='complete', stopped=datetime.now())
+                logger.info(f'Download {download.identifier} is complete!')
+
+                logger.info(f'Performing webhook for download {download.identifier}')
+                try:
+                    post(download.webhook_url, json={'identifier': download.identifier})
+                except Exception:
+                    logger.exception(f'Failed to perform webhook for {download.identifier}')
+
+                continue
+
+            scheduler = create_scheduler(
+                hostname=download.target_hostname,
+                credential=create_credential(
+                    username=download.target_username,
+                    password=download.target_password
+                )
+            )
+
+            logger.debug(f'Updating job(s) of download {download.identifier}...')
+            await update_jobs(download, scheduler)
+            scheduler.close()
+
+            # Ensure there is an active job.
+            try:
+                await Job.objects.filter(
+                    download=download,
+                    status__in=['created', 'started']
+                ).get()
+            except NoMatch:
+                logger.info(f'No active job for download {download.identifier}, creating one...')
+                await create_job(download)
+        except e:
+            logger.exception(f'Failed to review download: {download.identifier}!')
 
 STOPPED_STATES = [
-    'CANCELLED', 
-    'FAILED', 
-    'NODE_FAIL', 
-    'OUT_OF_MEMORY', 
-    'PREEMPTED', 
+    'CANCELLED',
+    'FAILED',
+    'NODE_FAIL',
+    'OUT_OF_MEMORY',
+    'PREEMPTED',
     'TIMEOUT'
 ]
 
 async def update_jobs(download, scheduler):
     jobs = await Job.objects.filter(
-        download=download, 
+        download=download,
         status__in=['created', 'started']
     ).all()
 
@@ -87,7 +93,3 @@ async def update_jobs(download, scheduler):
         if state in STOPPED_STATES or state.startswith('CANCELLED'):
             logger.info(f'Job {job.identifier} has stopped with state: {state}')
             await job.update(status='stopped', stopped=datetime.now())
-    
-
-def cancel_job(xenon_id, scheduler):
-    pass
