@@ -65,7 +65,7 @@ async def review_downloads():
             except NoMatch:
                 logger.info(f'No active job for download {download.identifier}, creating one...')
                 await create_job(download)
-        except e:
+        except Error:
             logger.exception(f'Failed to review download: {download.identifier}!')
 
 STOPPED_STATES = [
