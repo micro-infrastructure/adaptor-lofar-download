@@ -4,7 +4,7 @@ from loguru import logger
 from orm.exceptions import NoMatch
 from persistence import Download, Job, Partition
 from runtimes import pubsub, webapi
-from scheduling import create_credential, create_scheduler, get_xenon_state, create_job
+from scheduling import create_credential, create_scheduler, get_xenon_state, create_job, cancel_job
 
 from starlette.background import BackgroundTask
 
@@ -30,7 +30,7 @@ async def cancel(payload):
             scheduler = create_scheduler(
                 hostname=download.target_hostname,
                 credential=create_credential(
-                    username=download.target_username, 
+                    username=download.target_username,
                     password=download.target_password
                 )
             )

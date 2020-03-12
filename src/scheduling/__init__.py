@@ -28,7 +28,7 @@ async def create_job(download):
     parallelism = download.parallelism
     password = download.target_password
     username = download.target_username
-    
+
     job = await Job.objects.create(download=download)
 
     # Prepare Xenon objects
@@ -62,6 +62,7 @@ async def create_job(download):
     remotefs.write_to_file(script_path, script_lines)
 
     # Submit bootstrap script as job.
+    out_file = create_unique_path(f'd#{download.identifier}.txt')
     job_description = xenon.JobDescription(
         arguments=[str(script_path)],
         cores_per_task=8,
@@ -69,6 +70,8 @@ async def create_job(download):
         max_memory=8192,
         max_runtime=300,
         name=name,
+        stdout=f'stdout-{out_file}',
+        stderr=f'stderr-{out_file}',
     )
 
     scheduler = create_scheduler(hostname, credential)
@@ -125,7 +128,7 @@ def create_scheduler(hostname, credential):
 
 def create_remotefs(hostname, credential):
     return xenon.FileSystem.create(
-        'sftp',         
+        'sftp',
         location=f'{hostname}:22',
         password_credential=credential,
         properties={

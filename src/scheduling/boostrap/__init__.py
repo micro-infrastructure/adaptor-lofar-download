@@ -16,7 +16,7 @@ def get_bootstrap_generator(login_node):
     if login_node == 'pro.cyfronet.pl':
         return get_cyf_bootstrap_script
 
-    if __DAS5.contains(login_node):
+    if login_node in __DAS5:
         return get_das5_bootstrap_script
 
     if login_node == 'lisa.surfsara.nl':
