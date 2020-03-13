@@ -20,7 +20,7 @@ class Download(Model):
     target_password = String(max_length=100)
     target_username = String(max_length=100)
     webhook_url = String(max_length=None, allow_null=True)
-    queue = String(max_length=100)
+    queue = String(max_length=100, allow_null=True)
 
     # Timestamps
     started = DateTime(default=datetime.now)
