@@ -36,11 +36,12 @@ async def review_downloads():
                 await download.update(status='complete', stopped=datetime.now())
                 logger.info(f'Download {download.identifier} is complete!')
 
-                logger.info(f'Performing webhook for download {download.identifier}')
-                try:
-                    post(download.webhook_url, json={'identifier': download.identifier})
-                except Exception:
-                    logger.exception(f'Failed to perform webhook for {download.identifier}')
+                if download.webhook_url is not None:
+                    logger.info(f'Performing webhook for download {download.identifier}')
+                    try:
+                        post(download.webhook_url, json={'identifier': download.identifier})
+                    except Exception:
+                        logger.exception(f'Failed to perform webhook for {download.identifier}')
 
                 continue
 
