@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from base64 import b64decode
-from json import dumps, loads
+from json import loads
 from multiprocessing import Pool
 from os import path, remove, environ
 from subprocess import run, PIPE
@@ -21,7 +21,7 @@ def prepare_callback(url, job):
         }
 
         try:
-            post(url, json=dumps(payload).encode('UTF-8'))
+            post(url, json=payload)
         except Exception:
             logger.exception(f'Failed to post JSON to {url}')
 
