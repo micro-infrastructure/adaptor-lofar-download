@@ -21,7 +21,8 @@ async def download(payload):
         target_hostname=target['host'],
         target_password=credentials['password'],
         target_username=credentials['username'],
-        webhook_url=webhook.get('url', None)
+        webhook_url=webhook.get('url', None),
+        queue=options['queue'],
     )
 
     # Persist partitions.
@@ -32,7 +33,7 @@ async def download(payload):
 
         for filename in files:
             await Transfer.objects.create(
-                filename=filename, 
+                filename=filename,
                 partition=partition,
             )
 

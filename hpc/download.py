@@ -5,8 +5,10 @@ from multiprocessing import Pool
 from os import path, remove, environ
 from subprocess import run, PIPE
 from sys import argv, exc_info
-from urllib.request import Request, urlopen
 from uuid import uuid4
+from loguru import logger
+from requests import post
+from os.path import isfile
 
 
 def prepare_callback(url, job):
@@ -18,13 +20,10 @@ def prepare_callback(url, job):
             'subject': subject,
         }
 
-        data = dumps(payload).encode('UTF-8')
-        headers = { 'Content-Type': 'application/json' }
-
         try:
-            urlopen(Request(url, data, headers))
-        except:
-            print(f'Failed to post JSON to: {url}')
+            post(url, json=dumps(payload).encode('UTF-8'))
+        except Exception:
+            logger.exception(f'Failed to post JSON to {url}')
 
     return callback
 
@@ -43,6 +42,10 @@ def download(partition, callback_url, job, proxy_file, working_dir):
     with open(copyjob_file, 'w') as f:
         f.write(copyjob)
 
+    proxy_file_found = isfile(proxy_file)
+    logger.info(f'Proxy file: {proxy_file} (found: {proxy_file_found}')
+    logger.info(f'Copyjob file: {copyjob_file}')
+
     command = [
         'srmcp',
         '-debug',
@@ -57,11 +60,14 @@ def download(partition, callback_url, job, proxy_file, working_dir):
         callback(identifier, 'started', 'partition')
         run(command, stdout=PIPE, check=True)
         callback(identifier, 'complete', 'partition')
-    except:
+    except Exception:
+        logger.exception(f'Failed to download partition')
         callback(identifier, 'failed', 'partition')
-
-    # Cleanup
-    remove(copyjob_file)
+    finally:
+        try:
+            remove(copyjob_file)
+        except Exception:
+            logger.exception(f'Failed to perform cleanup')
 
 
 if __name__ == '__main__':

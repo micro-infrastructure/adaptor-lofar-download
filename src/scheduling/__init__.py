@@ -5,6 +5,7 @@ from .boostrap import get_bootstrap_generator
 from operator import attrgetter
 from base64 import b64decode, b64encode
 from json import dumps
+from loguru import logger
 from hashlib import md5
 from os import getenv
 from time import localtime
@@ -28,6 +29,7 @@ async def create_job(download):
     parallelism = download.parallelism
     password = download.target_password
     username = download.target_username
+    queue = download.queue
 
     job = await Job.objects.create(download=download)
 
@@ -71,8 +73,12 @@ async def create_job(download):
         max_runtime=300,
         name=name,
         stdout=f'stdout-{out_file}',
-        stderr=f'stderr-{out_file}',
+        stderr=f'stderr-{out_file}'
     )
+
+    if queue is not None:
+        job_description.queue_name=queue
+        logger.info(f'Using {queue} instead of default queue')
 
     scheduler = create_scheduler(hostname, credential)
     xenon_job = scheduler.submit_batch_job(job_description)

@@ -20,6 +20,7 @@ class Download(Model):
     target_password = String(max_length=100)
     target_username = String(max_length=100)
     webhook_url = String(max_length=None, allow_null=True)
+    queue = String(max_length=100)
 
     # Timestamps
     started = DateTime(default=datetime.now)
@@ -59,7 +60,7 @@ class Transfer(Model):
 class Job(Model):
     __tablename__ = "job"
     __database__ = database
-    __metadata__ = metadata  
+    __metadata__ = metadata
 
     identifier = Integer(primary_key=True)
 
