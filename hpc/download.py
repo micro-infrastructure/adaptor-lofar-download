@@ -43,7 +43,7 @@ def download(partition, callback_url, job, proxy_file, working_dir):
         f.write(copyjob)
 
     proxy_file_found = isfile(proxy_file)
-    logger.info(f'Proxy file: {proxy_file} (found: {proxy_file_found}')
+    logger.info(f'Proxy file: {proxy_file} (found: {proxy_file_found})')
     logger.info(f'Copyjob file: {copyjob_file}')
 
     command = [
@@ -58,7 +58,7 @@ def download(partition, callback_url, job, proxy_file, working_dir):
 
     try:
         callback(identifier, 'started', 'partition')
-        run(command, stdout=PIPE, check=True)
+        run(command, stdout=PIPE, stderr=PIPE, check=True)
         callback(identifier, 'complete', 'partition')
     except Exception:
         logger.exception(f'Failed to download partition')
