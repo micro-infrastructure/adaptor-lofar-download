@@ -17,7 +17,7 @@ async def callback(payload):
 
             # Update attempts from previous jobs, if exists.
             existing_attempts = await Attempt.objects.filter(job__download=job.download).all()
-            for attempt in existing_attemps:
+            for attempt in existing_attempts:
                 await attempt.update(status='failed', stopped=datetime.now())
 
         if status == 'stopped':
@@ -37,7 +37,7 @@ async def callback(payload):
         else:
             if status == 'complete':
                 await partition.update(status='complete', stopped=datetime.now())
- 
+
             attempt = await (Attempt.objects
                 .filter(job=job, partition=partition, status='started')
                 .get())
@@ -53,4 +53,4 @@ def unpack_command(payload):
     status = payload['status']
     subject = payload['subject']
 
-    return (identifier, job, status, subject)    
+    return (identifier, job, status, subject)
