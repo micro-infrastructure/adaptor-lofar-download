@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from orm import DateTime, ForeignKey, Integer, Model, String
+from orm import DateTime, ForeignKey, Integer, Model, String, Boolean
 from persistence import database, metadata
 
 class Download(Model):
@@ -21,6 +21,7 @@ class Download(Model):
     target_username = String(max_length=100)
     webhook_url = String(max_length=None, allow_null=True)
     queue = String(max_length=100, allow_null=True)
+    log = Boolean(default=False)
 
     # Timestamps
     started = DateTime(default=datetime.now)

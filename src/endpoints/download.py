@@ -23,6 +23,7 @@ async def download(payload):
         target_username=credentials['username'],
         webhook_url=webhook.get('url', None),
         queue=options.get('queue', None),
+        log=options.get('log', False),
     )
 
     # Persist partitions.

@@ -30,6 +30,7 @@ async def create_job(download):
     password = download.target_password
     username = download.target_username
     queue = download.queue
+    log = download.log
 
     job = await Job.objects.create(download=download)
 
@@ -64,17 +65,19 @@ async def create_job(download):
     remotefs.write_to_file(script_path, script_lines)
 
     # Submit bootstrap script as job.
-    out_file = create_unique_path(f'd#{download.identifier}.txt')
     job_description = xenon.JobDescription(
         arguments=[str(script_path)],
         cores_per_task=8,
         executable='/bin/bash',
         max_memory=8192,
         max_runtime=300,
-        name=name,
-        stdout=f'stdout-{out_file}',
-        stderr=f'stderr-{out_file}'
+        name=name
     )
+
+    if log:
+        out_file = create_unique_path(f'd#{download.identifier}.txt')
+        job_description.stdout = f'stdout-{out_file}'
+        job_description.stderr = f'stderr-{out_file}'
 
     if queue is not None:
         job_description.queue_name=queue
@@ -83,6 +86,11 @@ async def create_job(download):
     scheduler = create_scheduler(hostname, credential)
     xenon_job = scheduler.submit_batch_job(job_description)
     await job.update(xenon_id=xenon_job.id)
+
+    try:
+        remotefs.delete(script_path)
+    except Exception:
+        logger.exception(f'Failed to delete file: {script_path}')
 
 
 async def create_arguments(callback_url, download, identifier, proxy_file, parallelism):

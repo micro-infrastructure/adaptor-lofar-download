@@ -67,7 +67,7 @@ def download(partition, callback_url, job, proxy_file, working_dir):
         try:
             remove(copyjob_file)
         except Exception:
-            logger.exception(f'Failed to perform cleanup')
+            logger.exception(f'Failed to remove copyjob file')
 
 
 if __name__ == '__main__':
@@ -98,3 +98,7 @@ if __name__ == '__main__':
         pool.starmap(download, partitions_with_arguments)
 
     callback(identifier, 'stopped', 'job')
+    try:
+        remove(proxy_file)
+    except Exception:
+        logger.exception(f'Failed to remote proxy file')
