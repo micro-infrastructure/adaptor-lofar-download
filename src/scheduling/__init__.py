@@ -63,12 +63,18 @@ async def create_job(download):
     script_lines = [l.encode('UTF-8') for l in script.splitlines(keepends=True)]
 
     remotefs.write_to_file(script_path, script_lines)
+    remotefs.set_posix_file_permissions(script_path, [
+        xenon.PosixFilePermission.OWNER_EXECUTE,
+        xenon.PosixFilePermission.OWNER_READ,
+        xenon.PosixFilePermission.OWNER_WRITE,
+        xenon.PosixFilePermission.OTHERS_EXECUTE,
+        xenon.PosixFilePermission.OTHERS_READ,
+    ])
 
     # Submit bootstrap script as job.
     job_description = xenon.JobDescription(
-        arguments=[str(script_path)],
         cores_per_task=8,
-        executable='/bin/bash',
+        executable=script_path,
         max_memory=8192,
         max_runtime=300,
         name=name
