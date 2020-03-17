@@ -71,7 +71,7 @@ async def review_downloads():
 
                 if job_count >= 25:
                     logger.info(f'Job count maximum has been reached for download {download.identifier}, cancelling...')
-                    await download.update(status='canceled', stopped=datetime.now())
+                    await download.update(status='depleted', stopped=datetime.now())
                 else:
                     logger.info(f'No active job for download {download.identifier}, creating one... ({job_count+1}/25)')
                     await create_job(download)
