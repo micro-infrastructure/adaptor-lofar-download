@@ -57,24 +57,19 @@ async def create_job(download):
 
     # Write bootstrap script to remote filesystem
     generate_bootstrap = get_bootstrap_generator(hostname)
-
     script = generate_bootstrap(directory, IMAGE, arguments)
-    script_path = create_unique_path('bootstrap.sh')
-    script_lines = [l.encode('UTF-8') for l in script.splitlines(keepends=True)]
 
+    script_path = create_unique_path('bootstrap.sh')
+    # script += f'rm {str(script_path)}'  + '\n'
+
+    script_lines = [l.encode('UTF-8') for l in script.splitlines(keepends=True)]
     remotefs.write_to_file(script_path, script_lines)
-    remotefs.set_posix_file_permissions(script_path, [
-        xenon.PosixFilePermission.OWNER_EXECUTE,
-        xenon.PosixFilePermission.OWNER_READ,
-        xenon.PosixFilePermission.OWNER_WRITE,
-        xenon.PosixFilePermission.OTHERS_EXECUTE,
-        xenon.PosixFilePermission.OTHERS_READ,
-    ])
 
     # Submit bootstrap script as job.
     job_description = xenon.JobDescription(
+        arguments=[str(script_path)],
         cores_per_task=8,
-        executable=script_path,
+        executable='/bin/bash',
         max_memory=8192,
         max_runtime=300,
         name=name
@@ -92,11 +87,6 @@ async def create_job(download):
     scheduler = create_scheduler(hostname, credential)
     xenon_job = scheduler.submit_batch_job(job_description)
     await job.update(xenon_id=xenon_job.id)
-
-    try:
-        remotefs.delete(script_path)
-    except Exception:
-        logger.exception(f'Failed to delete file: {script_path}')
 
 
 async def create_arguments(callback_url, download, identifier, proxy_file, parallelism):

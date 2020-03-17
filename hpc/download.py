@@ -100,5 +100,6 @@ if __name__ == '__main__':
     callback(identifier, 'stopped', 'job')
     try:
         remove(proxy_file)
+        remove(proxy_file.replace('proxy.crt', 'bootstrap.sh'))
     except Exception:
-        logger.exception(f'Failed to remote proxy file')
+        logger.exception(f'Failed to remote proxy / bootstrap file')
