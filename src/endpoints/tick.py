@@ -65,9 +65,9 @@ async def review_downloads():
                 ).get()
             except NoMatch:
                 # Check how many jobs have been started
-                job_count = len(Job.objects.filter(
+                job_count = await Job.objects.filter(
                     download=download
-                ))
+                ).count()
 
                 if job_count >= 25:
                     logger.info(f'Job count maximum has been reached for download {download.identifier}, cancelling...')
