@@ -57,15 +57,25 @@ async def review_downloads():
             await update_jobs(download, scheduler)
             scheduler.close()
 
-            # Ensure there is an active job.
+            # Ensure there is an active job, if max jobs is not exceeded.
             try:
                 await Job.objects.filter(
                     download=download,
                     status__in=['created', 'started']
                 ).get()
             except NoMatch:
-                logger.info(f'No active job for download {download.identifier}, creating one...')
-                await create_job(download)
+                # Check how many jobs have been started
+                job_count = len(Job.objects.filter(
+                    download=download
+                ))
+
+                if job_count >= 25:
+                    logger.info(f'Job count maximum has been reached for download {download.identifier}, cancelling...')
+                    await download.update(status='canceled', stopped=datetime.now())
+                else:
+                    logger.info(f'No active job for download {download.identifier}, creating one... ({job_count+1}/25)')
+                    await create_job(download)
+
         except Exception:
             logger.exception(f'Failed to review download: {download.identifier}!')
 
