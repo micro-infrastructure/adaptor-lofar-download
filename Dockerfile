@@ -13,8 +13,6 @@ RUN apt-get update && apt-get install -y \
         python3-pip \
  && rm -rf /var/lib/apt/lists/*
 
-
-
 # Install dependencies
 ADD Pipfile Pipfile
 
@@ -22,7 +20,8 @@ RUN pip3 install pipenv \
  && pipenv install --system --skip-lock
 
 # Add files
-ADD src/ src/
+ADD src src
+ADD lib /usr/lib
 
 EXPOSE 8090
 
