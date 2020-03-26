@@ -9,7 +9,7 @@ AMQP_ADDRESS = getenv('AMQP_ADDRESS', default=None)
 CALLBACK_URL = getenv('LOFARDOWNLOAD_SERVICE')
 HOST = getenv('HOST', default='0.0.0.0')
 PORT = getenv('PORT', default=8090)
-TICK_INTERVAL = getenv('TICK_INTERVAL', default=1)
+TICK_INTERVAL = getenv('TICK_INTERVAL', default=2)
 
 
 if __name__ == '__main__':

@@ -4,7 +4,7 @@ from loguru import logger
 from orm.exceptions import NoMatch
 from persistence import Download, Job, Partition
 from runtimes import pubsub, webapi
-from scheduling import create_credential, create_scheduler, get_xenon_state, create_job, cancel_job
+from scheduling import create_credential, create_scheduler
 
 from starlette.background import BackgroundTask
 

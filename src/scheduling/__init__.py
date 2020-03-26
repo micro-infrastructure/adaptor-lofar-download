@@ -22,7 +22,7 @@ def cancel_job(xenon_id, scheduler):
     return scheduler.cancel_job(xenon.Job(xenon_id))
 
 
-async def create_job(download):
+async def create_job(download, scheduler):
     directory = download.target_directory
     hostname = download.target_hostname
     name = download.name
@@ -36,7 +36,7 @@ async def create_job(download):
 
     # Prepare Xenon objects
     credential = create_credential(username, password)
-    remotefs = create_remotefs(hostname, credential)
+    remotefs = scheduler.get_file_system()
 
     # Write proxy certificate to remote filesystem
     proxy = b64decode(download.certificate).decode('UTF-8')
@@ -84,7 +84,6 @@ async def create_job(download):
         job_description.queue_name=queue
         logger.info(f'Using {queue} instead of default queue')
 
-    scheduler = create_scheduler(hostname, credential)
     xenon_job = scheduler.submit_batch_job(job_description)
     await job.update(xenon_id=xenon_job.id)
 

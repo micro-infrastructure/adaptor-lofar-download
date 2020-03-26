@@ -55,7 +55,6 @@ async def review_downloads():
 
             logger.debug(f'Updating job(s) of download {download.identifier}...')
             await update_jobs(download, scheduler)
-            scheduler.close()
 
             # Ensure there is an active job, if max jobs is not exceeded.
             try:
@@ -74,7 +73,10 @@ async def review_downloads():
                     await download.update(status='depleted', stopped=datetime.now())
                 else:
                     logger.info(f'No active job for download {download.identifier}, creating one... ({job_count+1}/25)')
-                    await create_job(download)
+                    await create_job(download, scheduler)
+
+            # Close scheduler
+            scheduler.close()
 
         except Exception:
             logger.exception(f'Failed to review download: {download.identifier}!')
