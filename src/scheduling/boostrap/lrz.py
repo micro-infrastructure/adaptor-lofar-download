@@ -1,6 +1,8 @@
 from os.path import basename
 
 def get_lrz_bootstrap_script(directory, image, arguments):
+    image = 'microinfrastructure/adaptor-lofar-download-hpc'
+
     script = ''
 
     script += '#!/bin/bash' + '\n'

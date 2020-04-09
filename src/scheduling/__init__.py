@@ -13,7 +13,6 @@ from time import localtime
 
 IMAGE = 'docker://microinfrastructure/adaptor-lofar-download-hpc'
 
-
 def get_xenon_state(xenon_id, scheduler):
     return scheduler.get_job_status(xenon.Job(xenon_id))
 
@@ -71,7 +70,7 @@ async def create_job(download, scheduler):
         cores_per_task=8,
         executable='/bin/bash',
         max_memory=8192,
-        max_runtime=300,
+        max_runtime=90,
         name=name
     )
 
