@@ -69,7 +69,7 @@ async def create_job(download, scheduler):
         arguments=[str(script_path)],
         cores_per_task=8,
         executable='/bin/bash',
-        max_memory=8192,
+        max_memory=16384,
         max_runtime=90,
         name=name
     )

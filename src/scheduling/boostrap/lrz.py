@@ -9,7 +9,7 @@ def get_lrz_bootstrap_script(directory, image, arguments):
     script += 'module load slurm_setup/defaut' + '\n'
     script += 'module load charliecloud' + '\n'
     script += 'curl -L https://git.io/JvvIy -o chaplin && chmod +x chaplin' + '\n'
-    script += f'./chaplin -n -d {image}' + '\n'
+    script += f'./chaplin -d {image}' + '\n'
 
     image = basename(image)
 
