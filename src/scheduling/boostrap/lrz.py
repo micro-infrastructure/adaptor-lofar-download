@@ -8,8 +8,10 @@ def get_lrz_bootstrap_script(directory, image, arguments):
     script += '#!/bin/bash' + '\n'
     script += 'module load slurm_setup/defaut' + '\n'
     script += 'module load charliecloud' + '\n'
-    script += 'curl -L https://git.io/JvvIy -o chaplin && chmod +x chaplin' + '\n'
-    script += f'./chaplin -d {image}' + '\n'
+    script += 'if [ ! -d "./adaptor-lofar-download-hpc" ]; then' + '\n'
+    script += '  curl -L https://git.io/JvvIy -o chaplin && chmod +x chaplin' + '\n'
+    script += f'  ./chaplin -d {image}' + '\n'
+    script += 'fi' + '\n'
 
     image = basename(image)
 
