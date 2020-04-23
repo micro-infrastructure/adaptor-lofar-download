@@ -17,7 +17,7 @@ class Download(Model):
     status = String(max_length=100, default='started')              # started -> complete | canceled | depleted
     target_directory = String(max_length=100)
     target_hostname = String(max_length=100)
-    target_password = String(max_length=100)
+    target_password = String(max_length=100, allow_null=True)
     target_username = String(max_length=100)
     webhook_url = String(max_length=None, allow_null=True)
     queue = String(max_length=100, allow_null=True)

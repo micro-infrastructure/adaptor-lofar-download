@@ -21,7 +21,7 @@ async def download(payload):
         parallelism=options['parallelism'],
         target_directory=target['path'],
         target_hostname=target['host'],
-        target_password=credentials['password'],
+        target_password=credentials.get('password'),
         target_username=credentials['username'],
         webhook_url=webhook.get('url', None),
         queue=options.get('queue', None),

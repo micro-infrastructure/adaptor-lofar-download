@@ -29,10 +29,8 @@ async def cancel(payload):
 
             scheduler = create_scheduler(
                 hostname=download.target_hostname,
-                credential=create_credential(
-                    username=download.target_username,
-                    password=download.target_password
-                )
+                username=download.target_username,
+                password=download.target_password
             )
 
             cancel_job(job.xenon_id, scheduler)

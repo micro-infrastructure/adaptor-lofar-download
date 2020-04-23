@@ -47,10 +47,8 @@ async def review_downloads():
 
             scheduler = create_scheduler(
                 hostname=download.target_hostname,
-                credential=create_credential(
-                    username=download.target_username,
-                    password=download.target_password
-                )
+                username=download.target_username,
+                password=download.target_password
             )
 
             logger.debug(f'Updating job(s) of download {download.identifier}...')

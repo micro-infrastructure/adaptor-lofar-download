@@ -7,7 +7,7 @@ from base64 import b64decode, b64encode
 from json import dumps
 from loguru import logger
 from hashlib import md5
-from os import getenv
+from os import getenv, path
 from time import localtime
 
 
@@ -26,15 +26,12 @@ async def create_job(download, scheduler):
     hostname = download.target_hostname
     name = download.name
     parallelism = download.parallelism
-    password = download.target_password
-    username = download.target_username
     queue = download.queue
     log = download.log
 
     job = await Job.objects.create(download=download)
 
     # Prepare Xenon objects
-    credential = create_credential(username, password)
     remotefs = scheduler.get_file_system()
 
     # Write proxy certificate to remote filesystem
@@ -59,7 +56,6 @@ async def create_job(download, scheduler):
     script = generate_bootstrap(directory, IMAGE, arguments)
 
     script_path = create_unique_path('bootstrap.sh')
-    # script += f'rm {str(script_path)}'  + '\n'
 
     script_lines = [l.encode('UTF-8') for l in script.splitlines(keepends=True)]
     remotefs.write_to_file(script_path, script_lines)
@@ -115,31 +111,28 @@ def create_unique_path(filename):
 
     return xenon.Path(f'{random}_{filename}')
 
+def create_scheduler(hostname, username, password=None):
+    properties = {
+        'xenon.adaptors.schedulers.ssh.strictHostKeyChecking': 'false'
+    }
 
-def create_credential(username, password):
-    return xenon.PasswordCredential(
-        username=username,
-        password=password
-    )
-
-
-def create_scheduler(hostname, credential):
-    return xenon.Scheduler.create(
-        adaptor='slurm',
-        location=f'ssh://{hostname}:22',
-        password_credential=credential,
-        properties={
-            'xenon.adaptors.schedulers.ssh.strictHostKeyChecking': 'false'
-        }
-    )
-
-
-def create_remotefs(hostname, credential):
-    return xenon.FileSystem.create(
-        'sftp',
-        location=f'{hostname}:22',
-        password_credential=credential,
-        properties={
-            'xenon.adaptors.filesystems.sftp.strictHostKeyChecking': 'false'
-        }
-    )
+    if password is None:
+        return xenon.Scheduler.create(
+            adaptor='slurm',
+            location=f'ssh://{hostname}:22',
+            certificate_credential=xenon.CertificateCredential(
+                username=username,
+                certfile='/ssh/id_rsa'
+            ),
+            properties=properties
+        )
+    else:
+        return xenon.Scheduler.create(
+            adaptor='slurm',
+            location=f'ssh://{hostname}:22',
+            password_credential=xenon.PasswordCredential(
+                username=username,
+                password=password
+            ),
+            properties=properties
+        )
