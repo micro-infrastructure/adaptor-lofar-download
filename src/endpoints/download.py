@@ -1,20 +1,22 @@
 from http import HTTPStatus
-
+from os import getenv
 from persistence import Download, Partition, Transfer
 from runtimes import pubsub, webapi
 
+LOFAR_CERTIFICATE = getenv('LOFAR_CERTIFICATE', default=None)
 
 @pubsub.expose
 @webapi.expose
 async def download(payload):
     name, files, target, credentials, options, webhook = unpack_command(payload)
+    certificate = credentials.get('certificate', LOFAR_CERTIFICATE)
 
     # Divide file transfers into partitions.
     partitions = partitionize(files, options['partitions'])
 
     # Persist parameters.
     download = await Download.objects.create(
-        certificate=credentials['certificate'],
+        certificate=certificate,
         name=name,
         parallelism=options['parallelism'],
         target_directory=target['path'],
